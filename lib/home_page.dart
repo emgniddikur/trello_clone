@@ -1,5 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:trello_clone/widgets/presentational/base_button.dart';
+import 'package:trello_clone/widgets/presentational/my_card.dart';
+import 'package:trello_clone/widgets/presentational/my_text_field.dart';
 import 'package:trello_clone/task_card.dart';
 import 'package:trello_clone/task_column.dart';
 
@@ -33,47 +36,29 @@ class _HomePageState extends State<HomePage> {
       items: [
         taskColumns.map((taskColumn) {
           return Container(
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(10.0),
               margin: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-              decoration: BoxDecoration(boxShadow: [
-                BoxShadow(
-                    blurRadius: 8,
-                    offset: Offset(0, 0),
-                    color: Color.fromRGBO(127, 140, 141, 0.5),
-                    spreadRadius: 2)
-              ], borderRadius: BorderRadius.circular(4.0), color: Colors.white),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    [
-                      Container(
-                          child: Text(taskColumn.name),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 5.0, horizontal: 10.0),
-                          margin: EdgeInsets.only(bottom: 5.0),
-                      ),
-                    ],
-                    taskColumn.taskCards.map((taskCard) {
-                      return Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(10.0),
-                        margin: EdgeInsets.only(bottom: 10.0),
-                        decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                  blurRadius: 8,
-                                  offset: Offset(0, 0),
-                                  color: Color.fromRGBO(127, 140, 141, 0.5),
-                                  spreadRadius: 2)
-                            ],
-                            borderRadius: BorderRadius.circular(4.0),
-                            color: Colors.white),
-                        child: Text(taskCard.name),
-                      );
-                    }).toList(),
-                    [_buildAddTaskCard(taskColumn.id)]
-                  ].expand((element) => element).toList()));
+              child: MyCard(
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 5.0, horizontal: 10.0),
+                            margin: EdgeInsets.only(bottom: 5.0),
+                            child: Text(taskColumn.name),
+                          ),
+                        ],
+                        taskColumn.taskCards.map((taskCard) {
+                          return Container(
+                              margin: EdgeInsets.only(bottom: 10.0),
+                              child: MyCard(
+                                  width: double.infinity,
+                                  child: Text(taskCard.name)));
+                        }).toList(),
+                        [_buildAddTaskCard(taskColumn.id)]
+                      ].expand((element) => element).toList())));
         }).toList(),
         [_buildAddTaskColumn()]
       ].expand((element) => element).toList(),
@@ -94,51 +79,29 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(10.0),
-      margin: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-      decoration: BoxDecoration(boxShadow: [
-        BoxShadow(
-            blurRadius: 8.0,
-            offset: Offset(0, 0),
-            color: Color.fromRGBO(127, 140, 141, 0.5),
-            spreadRadius: 2)
-      ], borderRadius: BorderRadius.circular(4.0), color: Colors.white),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 40.0,
-            child: TextField(
-                controller: _taskColumnTextController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                  contentPadding: EdgeInsets.all(8),
-                )),
-          ),
-          SizedBox(
-            height: 40.0,
-            child: RaisedButton(
-              child: Text('カラムを追加'),
-              color: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4.0),
+        margin: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+        child: MyCard(
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            children: [
+              MyTextField(textEditingController: _taskColumnTextController),
+              BaseButton(
+                text: 'カラムを追加',
+                onPressed: () {
+                  // 新しいカラム名
+                  final newTaskColumnName =
+                      _taskColumnTextController.text.trim();
+                  // 空文字の場合は早期リターン
+                  if (newTaskColumnName == '') {
+                    return;
+                  }
+                  // カラムを追加
+                  _addTaskColumn(newTaskColumnName);
+                },
               ),
-              onPressed: () {
-                // 新しいカラム名
-                final newTaskColumnName = _taskColumnTextController.text.trim();
-                // 空文字の場合は早期リターン
-                if (newTaskColumnName == '') {
-                  return;
-                }
-                // カラムを追加
-                _addTaskColumn(newTaskColumnName);
-              },
-            ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildAddTaskCard(int taskColumnId) {
@@ -159,35 +122,21 @@ class _HomePageState extends State<HomePage> {
 
     return Column(
       children: [
-        SizedBox(
-          height: 40.0,
-          child: TextField(
-              controller: _taskCardTextController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                isDense: true,
-                contentPadding: EdgeInsets.all(8.0),
-              )),
+        MyTextField(
+          textEditingController: _taskCardTextController,
         ),
-        SizedBox(
-          height: 40.0,
-          child: RaisedButton(
-            child: Text('カードを追加'),
-            color: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            onPressed: () {
-              // 新しいカード名
-              final newTaskCardName = _taskCardTextController.text.trim();
-              // 空文字の場合は早期リターン
-              if (newTaskCardName == '') {
-                return;
-              }
-              // カードを追加
-              _addTaskCard(taskColumnId, newTaskCardName);
-            },
-          ),
+        BaseButton(
+          text: 'カードを追加',
+          onPressed: () {
+            // 新しいカード名
+            final newTaskCardName = _taskCardTextController.text.trim();
+            // 空文字の場合は早期リターン
+            if (newTaskCardName == '') {
+              return;
+            }
+            // カードを追加
+            _addTaskCard(taskColumnId, newTaskCardName);
+          },
         ),
       ],
     );
